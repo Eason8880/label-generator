@@ -145,7 +145,7 @@ h1,h2,h3,.editorial-sidebar__copy strong{
 .editorial-stage{
   flex:1;
   min-width:0;
-  margin-left:268px;
+  margin-left:0;
 }
 
 .editorial-app{
@@ -238,6 +238,10 @@ h1,h2,h3,.editorial-sidebar__copy strong{
 }
 
 .editorial-header__actions > button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
   width:42px;
   height:42px;
   padding:0 !important;
@@ -245,6 +249,10 @@ h1,h2,h3,.editorial-sidebar__copy strong{
   background:rgba(255,255,255,.8) !important;
   color:#7078a2 !important;
   box-shadow:var(--editorial-shadow-soft);
+}
+
+.editorial-header__actions > button svg{
+  display:block;
 }
 
 .editorial-main{
@@ -421,6 +429,45 @@ h1,h2,h3,.editorial-sidebar__copy strong{
 .editorial-settings-card .grid-cols-5 button{
   border-radius:999px !important;
   min-height:54px;
+}
+
+.editorial-ratio-icon-slot{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:20px;
+}
+
+.editorial-ratio-icon{
+  display:inline-block;
+  border:2px solid currentColor;
+  border-radius:4px;
+  opacity:.9;
+}
+
+.editorial-settings-card .grid-cols-5 button[data-ratio="1:1"] .editorial-ratio-icon{
+  width:16px;
+  height:16px;
+}
+
+.editorial-settings-card .grid-cols-5 button[data-ratio="16:9"] .editorial-ratio-icon{
+  width:24px;
+  height:14px;
+}
+
+.editorial-settings-card .grid-cols-5 button[data-ratio="9:16"] .editorial-ratio-icon{
+  width:14px;
+  height:24px;
+}
+
+.editorial-settings-card .grid-cols-5 button[data-ratio="4:3"] .editorial-ratio-icon{
+  width:22px;
+  height:16px;
+}
+
+.editorial-settings-card .grid-cols-5 button[data-ratio="3:4"] .editorial-ratio-icon{
+  width:16px;
+  height:22px;
 }
 
 .editorial-settings-card .grid-cols-2 button{

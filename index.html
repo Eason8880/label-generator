@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LabelGen AI - Editorial Label Studio</title>
+    <title>LabelGen AI - 高质感标签生成工作台</title>
     <meta name="description" content="以蓝紫 editorial dashboard 风格重构的标签生成工作台，将 PDF 或图片快速转化为高质感实拍效果图。" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,266 +14,104 @@
   </head>
   <body>
     <div class="editorial-layout">
-      <aside class="editorial-sidebar">
-        <div class="editorial-sidebar__brand">
-          <div class="editorial-sidebar__avatar">EP</div>
-          <div class="editorial-sidebar__copy">
-            <strong>Workspace</strong>
-            <span>Editorial Pro</span>
-          </div>
-        </div>
-
-        <nav class="editorial-sidebar__nav" aria-label="Primary">
-          <a class="editorial-sidebar__item is-active" href="javascript:void(0)">
-            <span class="editorial-sidebar__icon">▣</span>
-            <span>Dashboard</span>
-          </a>
-          <a class="editorial-sidebar__item" href="javascript:void(0)">
-            <span class="editorial-sidebar__icon">◫</span>
-            <span>Templates</span>
-          </a>
-          <a class="editorial-sidebar__item" href="javascript:void(0)">
-            <span class="editorial-sidebar__icon">◩</span>
-            <span>Assets</span>
-          </a>
-          <a class="editorial-sidebar__item" href="javascript:void(0)">
-            <span class="editorial-sidebar__icon">⟲</span>
-            <span>History</span>
-          </a>
-        </nav>
-
-        <button class="editorial-sidebar__cta" type="button">+ New Project</button>
-      </aside>
-
       <div class="editorial-stage">
         <div id="root"></div>
       </div>
     </div>
-  
-<style>
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-.inland-security-footer {
-  position: fixed;
-  z-index: 10;
-  bottom: 0;
-  right: 0;
-  width: fit-content;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.tooltip-container {
-  position: relative;
-}
-
-.trigger-content {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  background-color: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.minimax-link {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-weight: 300;
-  color: #adadad;
-  text-decoration: none;
-}
-
-.minimax-link:visited {
-  color: #adadad;
-}
-
-.minimax-link:hover {
-  color: #666666;
-}
-
-.tooltip-content {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  padding-bottom: 16px; /* 8px 内容间距 + 8px 用于鼠标移动的透明区域 */
-  font-size: 12px;
-  line-height: 17px;
-  background-color: #fafafa;
-  border-radius: 12px;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  color: #171717;
-}
-
-/* 创建透明的连接区域，让鼠标可以平滑移动到 tooltip */
-.tooltip-content::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  right: 0;
-  height: 16px;
-}
-
-.tooltip-container:hover .tooltip-content {
-  display: flex;
-}
-
-.info-section {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-}
-
-.beian-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #171717;
-}
-
-.beian-icon {
-  width: 14px;
-  height: 14px;
-  margin-right: 2px;
-}
-
-.underline-text {
-  color: #171717;
-  text-decoration: underline;
-}
-
-.underline-text:hover {
-  color: #000000;
-}
-
-/* 深色模式支持 */
-@media (prefers-color-scheme: dark) {
-  .trigger-content {
-    background-color: transparent;
-  }
-
-  .minimax-link,
-  .minimax-link:visited {
-    color: #666666;
-  }
-
-  .minimax-link:hover {
-    color: #adadad;
-  }
-
-  .tooltip-content {
-    background-color: #262626;
-    color: #ededed;
-  }
-
-  .beian-link,
-  .underline-text {
-    color: #ededed;
-  }
-
-  .underline-text:hover {
-    color: #ffffff;
-  }
-}
-
-</style>
-<div class="inland-security-footer">
-  <div class="tooltip-container">
-    <div class="trigger-content">
-      <a href="https://www.minimaxi.com/" target="_blank" rel="noreferrer" class="minimax-link">
-        <span>© 2026 MiniMax</span>
-      </a>
-    </div>
-    <div class="tooltip-content">
-      <section class="info-section">
-        <span>上海稀宇科技有限公司</span>
-      </section>
-
-      <section class="info-section">
-        <a class="beian-link" href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=31010402010179" target="_blank" rel="noreferrer">
-          <img alt="hailuo-beian-icon" src="https://cdn.hailuoai.com/hailuo-video-web/public_assets/223037d3-79fd-4db0-a456-749f38a6a14b.png" class="beian-icon">
-          <span class="underline-text">沪公网安备31010402010179号</span>
-        </a>
-        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer" class="underline-text">
-          沪ICP备2023003282号-38
-        </a>
-      </section>
-
-      <section class="info-section">
-        <span>模型名称：MiniMax</span>
-        <span>备案号：Shanghai-MiniMax-202505230046</span>
-      </section>
-
-      <section class="info-section">
-        <a href="https://agent.minimaxi.com/doc/zh/terms-of-service.html" target="_blank" rel="noreferrer" class="underline-text">
-          用户协议
-        </a>
-        <a href="https://agent.minimaxi.com/doc/zh/privacy-policy.html" target="_blank" rel="noreferrer" class="underline-text">
-          隐私政策
-        </a>
-      </section>
-    </div>
-  </div>
-</div>
-
-
 <script>
 (function () {
   var root = document.getElementById("root");
   if (!root) return;
 
-  var topNavMarkup = [
-    '<nav class="editorial-topnav" aria-label="Sections">',
-    '<a class="is-active" href="javascript:void(0)">Dashboard</a>',
-    '<a href="javascript:void(0)">Templates</a>',
-    '<a href="javascript:void(0)">Assets</a>',
-    '<a href="javascript:void(0)">History</a>',
-    "</nav>",
-  ].join("");
-
   function renameSectionTitles(app) {
     var headerTitle = app.querySelector("header h1");
     var headerSub = app.querySelector("header h1 + p");
     if (headerTitle) headerTitle.textContent = "LabelGen AI";
-    if (headerSub) headerSub.textContent = "Editorial Label Studio";
+    if (headerSub) headerSub.textContent = "高质感标签生成工作台";
 
     app.querySelectorAll("main h2").forEach(function (node) {
       var text = node.textContent && node.textContent.trim();
-      if (text === "Image Upload" || text === "上传电子标签") node.textContent = "Image Upload";
-      if (text === "提示词 Prompt" || text === "Prompt") node.textContent = "Prompt";
-      if (text === "调整设置" || text === "Adjustment Settings") node.textContent = "Adjustment Settings";
-      if (text === "生成结果" || text === "Generation Results") node.textContent = "Generation Results";
-      if (text === "使用说明" || text === "Studio Notes") node.textContent = "Studio Notes";
+      if (text === "Image Upload" || text === "上传电子标签" || text === "PDF or Image Upload" || text === "PDF 或图片上传") node.textContent = "PDF 或图片上传";
+      if (text === "提示词 Prompt" || text === "Prompt" || text === "提示词 提示词" || text === "提示词") node.textContent = "提示词";
+      if (text === "调整设置" || text === "Adjustment Settings" || text === "参数设置") node.textContent = "参数设置";
+      if (text === "生成结果" || text === "Generation Results") node.textContent = "生成结果";
+      if (text === "使用说明" || text === "Studio Notes") node.textContent = "使用说明";
     });
 
     app.querySelectorAll("p").forEach(function (node) {
       var text = node.textContent && node.textContent.trim();
-      if (text === "拖拽 PDF 或图片到此处") node.textContent = "Drag & drop image or PDF here";
-      if (text === "支持 PDF / PNG / JPG · 最大 20MB") node.textContent = "PDF / PNG / JPG · up to 20MB";
-      if (text === "暂无生成结果") node.textContent = "Ready to Generate";
-      if (text === "上传 PDF 并点击生成图片") node.textContent = "Adjust settings and click generate to render polished label visuals.";
-      if (text === "💡 Prompt 直接发送给 API，描述最终图片效果") node.textContent = "Prompt is sent directly to the API to shape the final visual outcome.";
+      if (text === "拖拽 PDF 或图片到此处" || text === "Drag & drop image or PDF here" || text === "拖拽图片或 PDF 到此处") node.textContent = "拖拽图片或 PDF 到此处";
+      if (text === "支持 PDF / PNG / JPG · 最大 20MB" || text === "PDF / PNG / JPG · up to 20MB") node.textContent = "支持 PDF / PNG / JPG · 最大 20MB";
+      if (text === "暂无生成结果" || text === "Ready to Generate" || text === "准备开始生成") node.textContent = "准备开始生成";
+      if (text === "上传 PDF 并点击生成图片" || text === "Adjust settings and click generate to render polished label visuals." || text === "调整参数后点击生成，即可输出高质感标签效果图。") node.textContent = "调整参数后点击生成，即可输出高质感标签效果图。";
+      if (text === "💡 Prompt 直接发送给 API，描述最终图片效果" || text === "Prompt is sent directly to the API to shape the final visual outcome." || text === "💡 提示词 直接发送给 API，描述最终图片效果" || text === "提示词会直接发送给 API，用于描述最终图片效果。") node.textContent = "提示词会直接发送给 API，用于描述最终图片效果。";
     });
+  }
+
+  function enhanceAspectRatioUI(settingsCard) {
+    if (!settingsCard) return;
+
+    var ratioButtons = Array.from(settingsCard.querySelectorAll(".grid-cols-5 button"));
+    var ratioNames = {
+      "1:1": "正方形",
+      "16:9": "宽屏",
+      "9:16": "竖屏",
+      "4:3": "标准",
+      "3:4": "竖版"
+    };
+
+    ratioButtons.forEach(function (button) {
+      var match = (button.textContent || "").match(/(1:1|16:9|9:16|4:3|3:4)/);
+      if (!match) return;
+      var ratio = match[1];
+      button.dataset.ratio = ratio;
+
+      var iconSlot = button.querySelector("div");
+      if (!iconSlot) return;
+      iconSlot.classList.add("editorial-ratio-icon-slot");
+
+      if (!iconSlot.querySelector(".editorial-ratio-icon")) {
+        iconSlot.textContent = "";
+        var icon = document.createElement("span");
+        icon.className = "editorial-ratio-icon";
+        icon.setAttribute("aria-hidden", "true");
+        iconSlot.appendChild(icon);
+      }
+    });
+
+    var ratioHint = Array.from(settingsCard.querySelectorAll("p")).find(function (node) {
+      return /(1:1|16:9|9:16|4:3|3:4)/.test(node.textContent || "");
+    });
+
+    var resolutionButtons = Array.from(settingsCard.querySelectorAll(".grid-cols-2 button")).filter(function (button) {
+      return /\dK\s*·\s*\d+[×x]\d+/i.test((button.textContent || "").replace(/\s+/g, " "));
+    });
+
+    var activeRatioButton = ratioButtons.find(function (button) {
+      return /bg-blue-500/.test(button.className) || /text-white/.test(button.className);
+    });
+
+    var activeResolutionButton = resolutionButtons.find(function (button) {
+      return /bg-purple-500/.test(button.className) || /text-white/.test(button.className);
+    });
+
+    var activeRatio = activeRatioButton && activeRatioButton.dataset ? activeRatioButton.dataset.ratio : "";
+    var resolutionText = activeResolutionButton ? (activeResolutionButton.textContent || "").replace(/\s+/g, " ").trim() : "";
+    var sizeMatch = resolutionText.match(/(\d+[×x]\d+)/i);
+    var sizeText = sizeMatch ? sizeMatch[1].replace("x", "×") : "";
+
+    if (ratioHint && activeRatio) {
+      ratioHint.textContent = activeRatio + " " + (ratioNames[activeRatio] || "") + (sizeText ? " · " + sizeText : "");
+    }
+
+    if (!settingsCard.dataset.aspectEnhanced) {
+      settingsCard.dataset.aspectEnhanced = "1";
+      settingsCard.addEventListener("click", function () {
+        requestAnimationFrame(function () {
+          enhanceAspectRatioUI(settingsCard);
+        });
+      });
+    }
   }
 
   function enhanceAppShell() {
@@ -290,13 +128,6 @@ body {
       if (headerInner.children[0]) headerInner.children[0].classList.add("editorial-brand-mark");
       if (headerInner.children[1]) headerInner.children[1].classList.add("editorial-brand-copy");
       if (headerInner.lastElementChild) headerInner.lastElementChild.classList.add("editorial-header__actions");
-      if (!headerInner.querySelector(".editorial-topnav")) {
-        headerInner.insertAdjacentHTML("beforeend", topNavMarkup);
-        var nav = headerInner.querySelector(".editorial-topnav");
-        if (nav && headerInner.lastElementChild !== nav) {
-          headerInner.insertBefore(nav, headerInner.querySelector(".editorial-header__actions"));
-        }
-      }
     }
 
     var main = app.querySelector("main");
@@ -337,6 +168,7 @@ body {
     if (settingsCard) {
       settingsCard.classList.add("editorial-settings-card");
       if (settingsCard.children[1]) settingsCard.children[1].classList.add("editorial-settings-body");
+      enhanceAspectRatioUI(settingsCard);
     }
 
     if (actionCard) actionCard.classList.add("editorial-action-card");
