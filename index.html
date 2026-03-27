@@ -3,13 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>实拍标签生成器 - 电子标签转化为实拍图片</title>
-    <meta name="description" content="将 PDF 内容转换为精美图片，AI 驱动的视觉内容生成工具" />
+    <title>LabelGen AI - Editorial Label Studio</title>
+    <meta name="description" content="以蓝紫 editorial dashboard 风格重构的标签生成工作台，将 PDF 或图片快速转化为高质感实拍效果图。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
     <script type="module" crossorigin src="/assets/index-xyz_pO0-.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-De69yEZo.css">
+    <link rel="stylesheet" href="/assets/editorial-overrides.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div class="editorial-layout">
+      <aside class="editorial-sidebar">
+        <div class="editorial-sidebar__brand">
+          <div class="editorial-sidebar__avatar">EP</div>
+          <div class="editorial-sidebar__copy">
+            <strong>Workspace</strong>
+            <span>Editorial Pro</span>
+          </div>
+        </div>
+
+        <nav class="editorial-sidebar__nav" aria-label="Primary">
+          <a class="editorial-sidebar__item is-active" href="javascript:void(0)">
+            <span class="editorial-sidebar__icon">▣</span>
+            <span>Dashboard</span>
+          </a>
+          <a class="editorial-sidebar__item" href="javascript:void(0)">
+            <span class="editorial-sidebar__icon">◫</span>
+            <span>Templates</span>
+          </a>
+          <a class="editorial-sidebar__item" href="javascript:void(0)">
+            <span class="editorial-sidebar__icon">◩</span>
+            <span>Assets</span>
+          </a>
+          <a class="editorial-sidebar__item" href="javascript:void(0)">
+            <span class="editorial-sidebar__icon">⟲</span>
+            <span>History</span>
+          </a>
+        </nav>
+
+        <button class="editorial-sidebar__cta" type="button">+ New Project</button>
+      </aside>
+
+      <div class="editorial-stage">
+        <div id="root"></div>
+      </div>
+    </div>
   
 <style>
 
@@ -199,6 +238,128 @@ body {
 
 
 <script>
+(function () {
+  var root = document.getElementById("root");
+  if (!root) return;
+
+  var topNavMarkup = [
+    '<nav class="editorial-topnav" aria-label="Sections">',
+    '<a class="is-active" href="javascript:void(0)">Dashboard</a>',
+    '<a href="javascript:void(0)">Templates</a>',
+    '<a href="javascript:void(0)">Assets</a>',
+    '<a href="javascript:void(0)">History</a>',
+    "</nav>",
+  ].join("");
+
+  function renameSectionTitles(app) {
+    var headerTitle = app.querySelector("header h1");
+    var headerSub = app.querySelector("header h1 + p");
+    if (headerTitle) headerTitle.textContent = "LabelGen AI";
+    if (headerSub) headerSub.textContent = "Editorial Label Studio";
+
+    app.querySelectorAll("main h2").forEach(function (node) {
+      var text = node.textContent && node.textContent.trim();
+      if (text === "Image Upload" || text === "上传电子标签") node.textContent = "Image Upload";
+      if (text === "提示词 Prompt" || text === "Prompt") node.textContent = "Prompt";
+      if (text === "调整设置" || text === "Adjustment Settings") node.textContent = "Adjustment Settings";
+      if (text === "生成结果" || text === "Generation Results") node.textContent = "Generation Results";
+      if (text === "使用说明" || text === "Studio Notes") node.textContent = "Studio Notes";
+    });
+
+    app.querySelectorAll("p").forEach(function (node) {
+      var text = node.textContent && node.textContent.trim();
+      if (text === "拖拽 PDF 或图片到此处") node.textContent = "Drag & drop image or PDF here";
+      if (text === "支持 PDF / PNG / JPG · 最大 20MB") node.textContent = "PDF / PNG / JPG · up to 20MB";
+      if (text === "暂无生成结果") node.textContent = "Ready to Generate";
+      if (text === "上传 PDF 并点击生成图片") node.textContent = "Adjust settings and click generate to render polished label visuals.";
+      if (text === "💡 Prompt 直接发送给 API，描述最终图片效果") node.textContent = "Prompt is sent directly to the API to shape the final visual outcome.";
+    });
+  }
+
+  function enhanceAppShell() {
+    var app = root.firstElementChild;
+    if (!app) return;
+
+    app.classList.add("editorial-app");
+
+    var header = app.querySelector("header");
+    var headerInner = header && header.firstElementChild;
+    if (header && headerInner) {
+      header.classList.add("editorial-header");
+      headerInner.classList.add("editorial-header__inner");
+      if (headerInner.children[0]) headerInner.children[0].classList.add("editorial-brand-mark");
+      if (headerInner.children[1]) headerInner.children[1].classList.add("editorial-brand-copy");
+      if (headerInner.lastElementChild) headerInner.lastElementChild.classList.add("editorial-header__actions");
+      if (!headerInner.querySelector(".editorial-topnav")) {
+        headerInner.insertAdjacentHTML("beforeend", topNavMarkup);
+        var nav = headerInner.querySelector(".editorial-topnav");
+        if (nav && headerInner.lastElementChild !== nav) {
+          headerInner.insertBefore(nav, headerInner.querySelector(".editorial-header__actions"));
+        }
+      }
+    }
+
+    var main = app.querySelector("main");
+    var mainGrid = main && main.firstElementChild;
+    if (!main || !mainGrid || mainGrid.children.length < 2) return;
+
+    main.classList.add("editorial-main");
+    mainGrid.classList.add("editorial-main-grid");
+
+    var leftCol = mainGrid.children[0];
+    var rightCol = mainGrid.children[1];
+    leftCol.classList.add("editorial-column", "editorial-column--left");
+    rightCol.classList.add("editorial-column", "editorial-column--right");
+
+    var uploadCard = leftCol.children[0];
+    var promptCard = leftCol.children[1];
+    var settingsCard = rightCol.children[0];
+    var actionCard = rightCol.children[1];
+    var resultCard = rightCol.children[2];
+    var noteCard = rightCol.children[3];
+
+    [uploadCard, promptCard, settingsCard, actionCard, resultCard, noteCard].forEach(function (card) {
+      if (card) card.classList.add("editorial-card");
+    });
+
+    if (uploadCard) {
+      uploadCard.classList.add("editorial-upload-card");
+      if (uploadCard.children[1]) uploadCard.children[1].classList.add("editorial-dropzone");
+    }
+
+    if (promptCard) {
+      promptCard.classList.add("editorial-prompt-card");
+      if (promptCard.children[1]) promptCard.children[1].classList.add("editorial-prompt-body");
+      var textarea = promptCard.querySelector("textarea");
+      if (textarea) textarea.classList.add("editorial-textarea");
+    }
+
+    if (settingsCard) {
+      settingsCard.classList.add("editorial-settings-card");
+      if (settingsCard.children[1]) settingsCard.children[1].classList.add("editorial-settings-body");
+    }
+
+    if (actionCard) actionCard.classList.add("editorial-action-card");
+    if (resultCard) {
+      resultCard.classList.add("editorial-result-card");
+      if (resultCard.children[1]) resultCard.children[1].classList.add("editorial-result-body");
+    }
+    if (noteCard) noteCard.classList.add("editorial-note-card");
+
+    renameSectionTitles(app);
+  }
+
+  var frame = null;
+  function scheduleEnhance() {
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(enhanceAppShell);
+  }
+
+  var observer = new MutationObserver(scheduleEnhance);
+  observer.observe(root, { childList: true, subtree: true });
+  scheduleEnhance();
+})();
+
 /**
  * Iframe 元素高亮注入脚本
  * 需要在目标网站中引入此脚本来支持跨域 iframe 高亮功能
