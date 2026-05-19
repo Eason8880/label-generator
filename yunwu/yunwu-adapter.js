@@ -1,6 +1,18 @@
 (function () {
   "use strict";
 
+  // Redirect CDN-hosted PDF.js worker to local copy so it works same-origin
+  var PDF_WORKER_CDN_RE = /cdnjs\.cloudflare\.com.*pdf\.worker/i;
+  var PDF_WORKER_LOCAL = "./assets/pdf.worker.min.js";
+  var OriginalWorker = window.Worker;
+  window.Worker = function PatchedWorker(url, options) {
+    if (typeof url === "string" && PDF_WORKER_CDN_RE.test(url)) {
+      url = PDF_WORKER_LOCAL;
+    }
+    return new OriginalWorker(url, options);
+  };
+  window.Worker.prototype = OriginalWorker.prototype;
+
   var LEGACY_ENDPOINT = "https://api.bltcy.ai/v1/images/edits";
   var YUNWU_EDITS_ENDPOINT = "/yunwu-api/v1/images/edits";
   var DEFAULT_LEGACY_MODEL = "gemini-3.1-flash-image-preview-2k";
