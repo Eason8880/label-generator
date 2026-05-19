@@ -111,7 +111,21 @@
 
   async function sendToYunwuImagesEdits(form, init) {
     var apiKey = readBearerToken(init.headers);
-    var upload = buildImagesEditsForm(form);
+    var imageFiles = form.getAll("image").filter(function (file) {
+      return file instanceof Blob;
+    });
+    if (!imageFiles.length) {
+      return jsonResponse(
+        {
+          error: {
+            message: "没有收到 PDF 转换后的页面图片，请重新上传 PDF 或图片文件"
+          }
+        },
+        400
+      );
+    }
+
+    var upload = buildImagesEditsForm(form, imageFiles);
     var response;
 
     try {
@@ -145,27 +159,34 @@
     return jsonResponse({ data: images.length ? images : [] }, response.status);
   }
 
-  function buildImagesEditsForm(form) {
+  function buildImagesEditsForm(form, imageFiles) {
     var upload = new FormData();
     upload.append("model", GPT_IMAGE_MODEL);
     upload.append(
       "prompt",
-      withGptImageReferenceInstruction(String(form.get("prompt") || ""), String(form.get("aspect_ratio") || ""))
+      withGptImageReferenceInstruction(
+        String(form.get("prompt") || ""),
+        String(form.get("aspect_ratio") || ""),
+        imageFiles.length
+      )
     );
     upload.append("response_format", String(form.get("response_format") || "url"));
 
-    form.getAll("image").forEach(function (file, index) {
-      if (file instanceof Blob) {
-        upload.append("image", file, file.name || "image" + (index + 1) + ".png");
-      }
+    imageFiles.forEach(function (file, index) {
+      upload.append("image", file, file.name || "pdf_page_" + (index + 1) + ".png");
     });
 
     return upload;
   }
 
-  function withGptImageReferenceInstruction(prompt, aspectRatio) {
+  function withGptImageReferenceInstruction(prompt, aspectRatio, imageCount) {
+    var imageRef =
+      imageCount > 1
+        ? "上传的 image1 到 image" + imageCount + " 是由同一个 PDF 按页转换得到的页面图片，请按顺序读取所有页面内容，"
+        : "上传的 image1 是由 PDF 页面或图片文件转换得到的参考图，请读取其中的完整内容，";
     var instruction =
-      "请把上传的 image1 作为标签正面内容来源，完整保留 image1 中的文字、图形、排版和比例，" +
+      imageRef +
+      "把上传图片中的文字、图形、排版和比例作为标签正面内容来源，" +
       "将其清晰印刷在白色圆角标签贴纸表面；不要生成空白标签，不要省略 image1 的内容。";
     return withAspectRatioPrefix(instruction + "\n\n" + prompt, aspectRatio);
   }
