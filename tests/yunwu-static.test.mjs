@@ -20,19 +20,22 @@ test("yunwu route has its own static entry and relative assets", async () => {
   assert.doesNotMatch(html, /href="\/assets\//);
 });
 
-test("yunwu adapter targets Yunwu Gemini API and the approved models", async () => {
+test("yunwu adapter supports Gemini models and gpt-image-2-all Images edits", async () => {
   const adapter = await fileText("yunwu/yunwu-adapter.js");
 
   assert.match(adapter, /\/yunwu-api\/v1\/images\/edits/);
+  assert.match(adapter, /\/yunwu-api\/v1beta\/models\//);
   assert.match(adapter, /gemini-3\.1-flash-image-preview/);
   assert.match(adapter, /gemini-3-pro-image-preview/);
+  assert.match(adapter, /gpt-image-2-all/);
   assert.match(adapter, /0\.083/);
   assert.match(adapter, /0\.165/);
+  assert.match(adapter, /0\.06 元\/次/);
+  assert.match(adapter, /buildImagesEditsForm/);
+  assert.match(adapter, /response_format/);
   assert.match(adapter, /image_size/);
   assert.match(adapter, /2K/);
   assert.match(adapter, /enforceOnly2KResolution/);
-  assert.doesNotMatch(adapter, /blobToBase64/);
-  assert.doesNotMatch(adapter, /generateContent/);
 });
 
 test("vercel rewrites the same-origin Yunwu proxy to the upstream API", async () => {

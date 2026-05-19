@@ -15,13 +15,16 @@
 
   var LEGACY_ENDPOINT = "https://api.bltcy.ai/v1/images/edits";
   var YUNWU_MODEL_ENDPOINT = "/yunwu-api/v1beta/models/";
+  var YUNWU_IMAGES_EDITS_ENDPOINT = "/yunwu-api/v1/images/edits";
   var DEFAULT_LEGACY_MODEL = "gemini-3.1-flash-image-preview-2k";
+  var GPT_IMAGE_MODEL = "gpt-image-2-all";
   var MODEL_KEY = "pdf2img_model";
   var MODEL_MAP = {
     "gemini-3.1-flash-image-preview-2k": "gemini-3.1-flash-image-preview",
     "nano-banana-2-2k": "gemini-3-pro-image-preview",
     "gemini-3.1-flash-image-preview": "gemini-3.1-flash-image-preview",
-    "gemini-3-pro-image-preview": "gemini-3-pro-image-preview"
+    "gemini-3-pro-image-preview": "gemini-3-pro-image-preview",
+    "gpt-image-2-all": "gpt-image-2-all"
   };
   var MODEL_TEXT = {
     "gemini-3.1-flash-image-preview-2k": "gemini-3.1-flash-image-preview",
@@ -62,6 +65,10 @@
 
   async function sendToYunwu(form, init) {
     var rawModel = String(form.get("model") || DEFAULT_LEGACY_MODEL);
+    if (rawModel === GPT_IMAGE_MODEL) {
+      return sendToYunwuImagesEdits(form, init);
+    }
+
     var model = MODEL_MAP[rawModel] || "gemini-3.1-flash-image-preview";
     var apiKey = readBearerToken(init.headers);
     var endpoint = YUNWU_MODEL_ENDPOINT + encodeURIComponent(model) + ":generateContent";
@@ -100,6 +107,68 @@
 
     var images = extractImages(payload);
     return jsonResponse({ data: images.length ? images : [] }, response.status);
+  }
+
+  async function sendToYunwuImagesEdits(form, init) {
+    var apiKey = readBearerToken(init.headers);
+    var upload = buildImagesEditsForm(form);
+    var response;
+
+    try {
+      response = await nativeFetch(YUNWU_IMAGES_EDITS_ENDPOINT, {
+        method: "POST",
+        headers: apiKey ? { Authorization: "Bearer " + apiKey } : {},
+        body: upload
+      });
+    } catch (error) {
+      return jsonResponse(
+        {
+          error: {
+            message: "Yunwu Images 请求失败，请稍后重试"
+          }
+        },
+        502
+      );
+    }
+
+    var payload = await parseJson(response);
+    if (!response.ok) {
+      return jsonResponse(
+        {
+          error: normalizeError(payload, response.status)
+        },
+        response.status
+      );
+    }
+
+    var images = extractImages(payload);
+    return jsonResponse({ data: images.length ? images : [] }, response.status);
+  }
+
+  function buildImagesEditsForm(form) {
+    var upload = new FormData();
+    upload.append("model", GPT_IMAGE_MODEL);
+    upload.append("prompt", withAspectRatioPrefix(String(form.get("prompt") || ""), String(form.get("aspect_ratio") || "")));
+    upload.append("response_format", String(form.get("response_format") || "url"));
+
+    form.getAll("image").forEach(function (file) {
+      if (file instanceof Blob) upload.append("image", file);
+    });
+
+    return upload;
+  }
+
+  function withAspectRatioPrefix(prompt, aspectRatio) {
+    var prefixMap = {
+      "16:9": "横版 16:9",
+      "9:16": "竖屏 9:16",
+      "4:3": "4:3",
+      "3:4": "3:4",
+      "1:1": "1:1 方形构图"
+    };
+    var prefix = prefixMap[aspectRatio];
+    if (!prefix || prompt.indexOf(prefix) === 0) return prompt;
+    return prefix + "，" + prompt;
   }
 
   async function buildGenerateContentPayload(form) {
@@ -264,6 +333,45 @@
     return heading ? heading.closest(".editorial-card, .bg-white") : null;
   }
 
+  function enhanceModelPicker(settingsCard) {
+    if (!settingsCard) return;
+    var headings = Array.from(settingsCard.querySelectorAll("p"));
+    var modelHeading = headings.find(function (node) {
+      return (node.textContent || "").trim() === "模型";
+    });
+    var modelGrid = modelHeading && modelHeading.parentElement && modelHeading.parentElement.querySelector(".grid");
+    if (!modelGrid || modelGrid.querySelector('[data-yunwu-model="' + GPT_IMAGE_MODEL + '"]')) return;
+
+    var isActive = false;
+    try {
+      isActive = localStorage.getItem(MODEL_KEY) === GPT_IMAGE_MODEL;
+    } catch (error) {}
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.dataset.yunwuModel = GPT_IMAGE_MODEL;
+    button.className = isActive
+      ? "py-2.5 rounded-xl text-sm font-medium text-center transition-all bg-blue-500 text-white shadow-md"
+      : "py-2.5 rounded-xl text-sm font-medium text-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200";
+    button.innerHTML = 'gpt-image-2-all<br><span class="text-xs opacity-75">0.06 元/次</span>';
+    button.addEventListener("click", function () {
+      try {
+        localStorage.setItem(MODEL_KEY, GPT_IMAGE_MODEL);
+      } catch (error) {}
+      window.location.reload();
+    });
+
+    modelGrid.appendChild(button);
+    if (isActive) deactivateSiblingModelButtons(modelGrid, button);
+  }
+
+  function deactivateSiblingModelButtons(modelGrid, activeButton) {
+    Array.from(modelGrid.querySelectorAll("button")).forEach(function (button) {
+      if (button === activeButton) return;
+      button.className = "py-2.5 rounded-xl text-sm font-medium text-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200";
+    });
+  }
+
   function enforceOnly2KResolution(settingsCard) {
     if (!settingsCard) return;
     var buttons = Array.from(settingsCard.querySelectorAll("button")).filter(function (button) {
@@ -309,6 +417,7 @@
     var root = document.getElementById("root");
     if (!root || !root.firstElementChild) return;
     var settingsCard = findSettingsCard(root);
+    enhanceModelPicker(settingsCard);
     enforceOnly2KResolution(settingsCard);
     replaceText(root);
   }
