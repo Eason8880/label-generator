@@ -66,8 +66,9 @@
     var apiKey = readBearerToken(init.headers);
     var proxyForm = new FormData();
 
+    var STRIP_KEYS = { model: 1, size: 1, image_size: 1, response_format: 1, aspect_ratio: 1 };
     form.forEach(function (value, key) {
-      if (key !== "model" && key !== "size" && key !== "image_size") {
+      if (!STRIP_KEYS[key]) {
         proxyForm.append(key, value);
       }
     });
