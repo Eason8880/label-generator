@@ -14,7 +14,7 @@
   window.Worker.prototype = OriginalWorker.prototype;
 
   var LEGACY_ENDPOINT = "https://api.bltcy.ai/v1/images/edits";
-  var YUNWU_EDITS_ENDPOINT = "/yunwu-api/v1/images/edits";
+  var YUNWU_MODEL_ENDPOINT = "/yunwu-api/v1beta/models/";
   var DEFAULT_LEGACY_MODEL = "gemini-3.1-flash-image-preview-2k";
   var MODEL_KEY = "pdf2img_model";
   var MODEL_MAP = {
@@ -64,24 +64,18 @@
     var rawModel = String(form.get("model") || DEFAULT_LEGACY_MODEL);
     var model = MODEL_MAP[rawModel] || "gemini-3.1-flash-image-preview";
     var apiKey = readBearerToken(init.headers);
-    var proxyForm = new FormData();
-
-    var STRIP_KEYS = { model: 1, size: 1, image_size: 1, response_format: 1, aspect_ratio: 1 };
-    form.forEach(function (value, key) {
-      if (!STRIP_KEYS[key]) {
-        proxyForm.append(key, value);
-      }
-    });
-    proxyForm.set("model", model);
+    var endpoint = YUNWU_MODEL_ENDPOINT + encodeURIComponent(model) + ":generateContent";
+    if (apiKey) endpoint += "?key=" + encodeURIComponent(apiKey);
 
     var response;
     try {
-      response = await nativeFetch(YUNWU_EDITS_ENDPOINT, {
+      response = await nativeFetch(endpoint, {
         method: "POST",
         headers: {
-          Authorization: apiKey ? "Bearer " + apiKey : ""
+          Authorization: apiKey ? "Bearer " + apiKey : "",
+          "Content-Type": "application/json"
         },
-        body: proxyForm
+        body: JSON.stringify(await buildGenerateContentPayload(form))
       });
     } catch (error) {
       return jsonResponse(
@@ -106,6 +100,64 @@
 
     var images = extractImages(payload);
     return jsonResponse({ data: images.length ? images : [] }, response.status);
+  }
+
+  async function buildGenerateContentPayload(form) {
+    var prompt = String(form.get("prompt") || "").trim();
+    var aspectRatio = String(form.get("aspect_ratio") || "1:1");
+    var imageSize = resolutionToImageSize(String(form.get("size") || form.get("image_size") || ""));
+    var parts = [];
+
+    if (prompt) parts.push({ text: prompt });
+
+    var images = form.getAll("image");
+    for (var index = 0; index < images.length; index += 1) {
+      var file = images[index];
+      if (file instanceof Blob) {
+        parts.push({
+          inline_data: {
+            mime_type: file.type || "image/png",
+            data: await blobToBase64(file)
+          }
+        });
+      }
+    }
+
+    return {
+      contents: [
+        {
+          role: "user",
+          parts: parts
+        }
+      ],
+      generationConfig: {
+        responseModalities: ["TEXT", "IMAGE"],
+        imageConfig: {
+          aspectRatio: aspectRatio,
+          imageSize: imageSize
+        }
+      }
+    };
+  }
+
+  function resolutionToImageSize(size) {
+    var match = size.match(/(\d+)\s*[x×]\s*(\d+)/i);
+    if (!match) return "2K";
+    var longEdge = Math.max(Number(match[1]), Number(match[2]));
+    if (longEdge >= 3500) return "4K";
+    if (longEdge >= 1500) return "2K";
+    return "1K";
+  }
+
+  async function blobToBase64(blob) {
+    var buffer = await blob.arrayBuffer();
+    var bytes = new Uint8Array(buffer);
+    var binary = "";
+    var chunkSize = 0x8000;
+    for (var index = 0; index < bytes.length; index += chunkSize) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(index, index + chunkSize));
+    }
+    return btoa(binary);
   }
 
   function readBearerToken(headers) {
