@@ -73,7 +73,6 @@
       }
     });
     proxyForm.set("model", model);
-    proxyForm.set("image_size", "2K");
 
     var response;
     try {
