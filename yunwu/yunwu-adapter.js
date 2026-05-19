@@ -2,7 +2,7 @@
   "use strict";
 
   var LEGACY_ENDPOINT = "https://api.bltcy.ai/v1/images/edits";
-  var YUNWU_BASE = "https://yunwu.ai/v1beta/models/";
+  var YUNWU_BASE = "/yunwu-api/v1beta/models/";
   var DEFAULT_LEGACY_MODEL = "gemini-3.1-flash-image-preview-2k";
   var MODEL_KEY = "pdf2img_model";
   var MODEL_MAP = {
@@ -15,7 +15,9 @@
     "gemini-3.1-flash-image-preview-2k": "gemini-3.1-flash-image-preview",
     "nano-banana-2-2k": "gemini-3-pro-image-preview",
     "0.1元/次": "0.083 元/次",
-    "0.2元/次": "0.165 元/次"
+    "0.2元/次": "0.165 元/次",
+    "Key 仅保存在浏览器本地，不会上传至任何服务器": "Key 仅保存在本浏览器，并经本站代理转发给 Yunwu API，不会被保存",
+    "API Key 仅保存在浏览器本地": "API Key 仅保存在浏览器本地，经本站代理转发给 Yunwu API"
   };
   var SIZE_TEXT = {
     "1024x1024": "2048×2048",

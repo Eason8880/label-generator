@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/yunwu-api/:path*",
+      "destination": "https://yunwu.ai/:path*"
+    }
+  ]
+}

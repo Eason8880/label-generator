@@ -23,7 +23,7 @@ test("yunwu route has its own static entry and relative assets", async () => {
 test("yunwu adapter targets Yunwu Gemini API and the approved models", async () => {
   const adapter = await fileText("yunwu/yunwu-adapter.js");
 
-  assert.match(adapter, /https:\/\/yunwu\.ai\/v1beta\/models\//);
+  assert.match(adapter, /\/yunwu-api\/v1beta\/models\//);
   assert.match(adapter, /gemini-3\.1-flash-image-preview/);
   assert.match(adapter, /gemini-3-pro-image-preview/);
   assert.match(adapter, /0\.083/);
@@ -32,4 +32,15 @@ test("yunwu adapter targets Yunwu Gemini API and the approved models", async () 
   assert.match(adapter, /enforceOnly2KResolution/);
   assert.doesNotMatch(adapter, /imageSize:\s*"1K"/);
   assert.doesNotMatch(adapter, /imageSize:\s*"4K"/);
+});
+
+test("vercel rewrites the same-origin Yunwu proxy to the upstream API", async () => {
+  const config = JSON.parse(await fileText("vercel.json"));
+
+  assert.deepEqual(config.rewrites, [
+    {
+      source: "/yunwu-api/:path*",
+      destination: "https://yunwu.ai/:path*"
+    }
+  ]);
 });
