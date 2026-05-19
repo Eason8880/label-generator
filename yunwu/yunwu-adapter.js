@@ -148,14 +148,26 @@
   function buildImagesEditsForm(form) {
     var upload = new FormData();
     upload.append("model", GPT_IMAGE_MODEL);
-    upload.append("prompt", withAspectRatioPrefix(String(form.get("prompt") || ""), String(form.get("aspect_ratio") || "")));
+    upload.append(
+      "prompt",
+      withGptImageReferenceInstruction(String(form.get("prompt") || ""), String(form.get("aspect_ratio") || ""))
+    );
     upload.append("response_format", String(form.get("response_format") || "url"));
 
-    form.getAll("image").forEach(function (file) {
-      if (file instanceof Blob) upload.append("image", file);
+    form.getAll("image").forEach(function (file, index) {
+      if (file instanceof Blob) {
+        upload.append("image", file, file.name || "image" + (index + 1) + ".png");
+      }
     });
 
     return upload;
+  }
+
+  function withGptImageReferenceInstruction(prompt, aspectRatio) {
+    var instruction =
+      "请把上传的 image1 作为标签正面内容来源，完整保留 image1 中的文字、图形、排版和比例，" +
+      "将其清晰印刷在白色圆角标签贴纸表面；不要生成空白标签，不要省略 image1 的内容。";
+    return withAspectRatioPrefix(instruction + "\n\n" + prompt, aspectRatio);
   }
 
   function withAspectRatioPrefix(prompt, aspectRatio) {
