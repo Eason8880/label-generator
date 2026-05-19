@@ -23,15 +23,16 @@ test("yunwu route has its own static entry and relative assets", async () => {
 test("yunwu adapter targets Yunwu Gemini API and the approved models", async () => {
   const adapter = await fileText("yunwu/yunwu-adapter.js");
 
-  assert.match(adapter, /\/yunwu-api\/v1beta\/models\//);
+  assert.match(adapter, /\/yunwu-api\/v1\/images\/edits/);
   assert.match(adapter, /gemini-3\.1-flash-image-preview/);
   assert.match(adapter, /gemini-3-pro-image-preview/);
   assert.match(adapter, /0\.083/);
   assert.match(adapter, /0\.165/);
-  assert.match(adapter, /imageSize:\s*"2K"/);
+  assert.match(adapter, /image_size/);
+  assert.match(adapter, /2K/);
   assert.match(adapter, /enforceOnly2KResolution/);
-  assert.doesNotMatch(adapter, /imageSize:\s*"1K"/);
-  assert.doesNotMatch(adapter, /imageSize:\s*"4K"/);
+  assert.doesNotMatch(adapter, /blobToBase64/);
+  assert.doesNotMatch(adapter, /generateContent/);
 });
 
 test("vercel rewrites the same-origin Yunwu proxy to the upstream API", async () => {
@@ -43,4 +44,17 @@ test("vercel rewrites the same-origin Yunwu proxy to the upstream API", async ()
       destination: "https://yunwu.ai/:path*"
     }
   ]);
+});
+
+test("Yunwu text replacements are idempotent", async () => {
+  const adapter = await fileText("yunwu/yunwu-adapter.js");
+
+  assert.doesNotMatch(
+    adapter,
+    /"Key 仅保存在浏览器本地，不会上传至任何服务器":\s*"[^"]*Key 仅保存在浏览器本地/
+  );
+  assert.doesNotMatch(
+    adapter,
+    /"API Key 仅保存在浏览器本地":\s*"[^"]*API Key 仅保存在浏览器本地/
+  );
 });

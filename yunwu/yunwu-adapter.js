@@ -2,7 +2,7 @@
   "use strict";
 
   var LEGACY_ENDPOINT = "https://api.bltcy.ai/v1/images/edits";
-  var YUNWU_BASE = "/yunwu-api/v1beta/models/";
+  var YUNWU_EDITS_ENDPOINT = "/yunwu-api/v1/images/edits";
   var DEFAULT_LEGACY_MODEL = "gemini-3.1-flash-image-preview-2k";
   var MODEL_KEY = "pdf2img_model";
   var MODEL_MAP = {
@@ -16,8 +16,8 @@
     "nano-banana-2-2k": "gemini-3-pro-image-preview",
     "0.1元/次": "0.083 元/次",
     "0.2元/次": "0.165 元/次",
-    "Key 仅保存在浏览器本地，不会上传至任何服务器": "Key 仅保存在本浏览器，并经本站代理转发给 Yunwu API，不会被保存",
-    "API Key 仅保存在浏览器本地": "API Key 仅保存在浏览器本地，经本站代理转发给 Yunwu API"
+    "Key 仅保存在浏览器本地，不会上传至任何服务器": "Key 存在本浏览器；生成时会转发给 Yunwu API，本站不保存",
+    "API Key 仅保存在浏览器本地": "API Key 存在本浏览器，生成时转发给 Yunwu API"
   };
   var SIZE_TEXT = {
     "1024x1024": "2048×2048",
@@ -51,48 +51,36 @@
   async function sendToYunwu(form, init) {
     var rawModel = String(form.get("model") || DEFAULT_LEGACY_MODEL);
     var model = MODEL_MAP[rawModel] || "gemini-3.1-flash-image-preview";
-    var prompt = String(form.get("prompt") || "");
-    var aspectRatio = String(form.get("aspect_ratio") || "3:4");
     var apiKey = readBearerToken(init.headers);
-    var parts = [];
+    var proxyForm = new FormData();
 
-    for (var image of form.getAll("image")) {
-      if (image instanceof Blob) {
-        parts.push({
-          inlineData: {
-            data: await blobToBase64(image),
-            mimeType: image.type || "image/png"
-          }
-        });
+    form.forEach(function (value, key) {
+      if (key !== "model" && key !== "size" && key !== "image_size") {
+        proxyForm.append(key, value);
       }
-    }
-
-    parts.push({ text: prompt });
-
-    var body = {
-      contents: [
-        {
-          role: "user",
-          parts: parts
-        }
-      ],
-      generationConfig: {
-        imageConfig: {
-          aspectRatio: aspectRatio,
-          imageSize: "2K"
-        },
-        responseModalities: ["IMAGE"]
-      }
-    };
-
-    var response = await nativeFetch(YUNWU_BASE + encodeURIComponent(model) + ":generateContent", {
-      method: "POST",
-      headers: {
-        Authorization: apiKey ? "Bearer " + apiKey : "",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
     });
+    proxyForm.set("model", model);
+    proxyForm.set("image_size", "2K");
+
+    var response;
+    try {
+      response = await nativeFetch(YUNWU_EDITS_ENDPOINT, {
+        method: "POST",
+        headers: {
+          Authorization: apiKey ? "Bearer " + apiKey : ""
+        },
+        body: proxyForm
+      });
+    } catch (error) {
+      return jsonResponse(
+        {
+          error: {
+            message: "Yunwu 代理请求失败，请稍后重试"
+          }
+        },
+        502
+      );
+    }
     var payload = await parseJson(response);
 
     if (!response.ok) {
@@ -121,17 +109,6 @@
       auth = headers.Authorization || headers.authorization || "";
     }
     return String(auth).replace(/^Bearer\s+/i, "").trim();
-  }
-
-  function blobToBase64(blob) {
-    return new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () {
-        resolve(String(reader.result || "").replace(/^data:[^,]+,/, ""));
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
   }
 
   async function parseJson(response) {
