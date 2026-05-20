@@ -373,34 +373,43 @@
       return (node.textContent || "").trim() === "模型";
     });
     var modelGrid = modelHeading && modelHeading.parentElement && modelHeading.parentElement.querySelector(".grid");
-    if (!modelGrid || modelGrid.querySelector('[data-yunwu-model="' + GPT_IMAGE_MODEL + '"]')) return;
+    if (!modelGrid) return;
 
-    var isActive = false;
-    try {
-      isActive = localStorage.getItem(MODEL_KEY) === GPT_IMAGE_MODEL;
-    } catch (error) {}
+    var button = modelGrid.querySelector('[data-yunwu-model="' + GPT_IMAGE_MODEL + '"]');
+    if (!button) {
+      button = document.createElement("button");
+      button.type = "button";
+      button.dataset.yunwuModel = GPT_IMAGE_MODEL;
+      button.innerHTML = 'gpt-image-2-all<br><span class="text-xs opacity-75">0.06 元/次</span>';
+      button.addEventListener("click", function () {
+        try {
+          localStorage.setItem(MODEL_KEY, GPT_IMAGE_MODEL);
+        } catch (error) {}
+        setModelButtonState(modelGrid, button, true);
+        window.location.reload();
+      });
+      modelGrid.appendChild(button);
+    }
 
-    var button = document.createElement("button");
-    button.type = "button";
-    button.dataset.yunwuModel = GPT_IMAGE_MODEL;
-    button.className = isActive
-      ? "py-2.5 rounded-xl text-sm font-medium text-center transition-all bg-blue-500 text-white shadow-md"
-      : "py-2.5 rounded-xl text-sm font-medium text-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200";
-    button.innerHTML = 'gpt-image-2-all<br><span class="text-xs opacity-75">0.06 元/次</span>';
-    button.addEventListener("click", function () {
-      try {
-        localStorage.setItem(MODEL_KEY, GPT_IMAGE_MODEL);
-      } catch (error) {}
-      window.location.reload();
-    });
-
-    modelGrid.appendChild(button);
-    if (isActive) deactivateSiblingModelButtons(modelGrid, button);
+    syncModelButtonState(modelGrid, button);
   }
 
-  function deactivateSiblingModelButtons(modelGrid, activeButton) {
+  function syncModelButtonState(modelGrid, gptButton) {
+    var activeModel = DEFAULT_LEGACY_MODEL;
+    try {
+      activeModel = localStorage.getItem(MODEL_KEY) || DEFAULT_LEGACY_MODEL;
+    } catch (error) {}
+    setModelButtonState(modelGrid, gptButton, activeModel === GPT_IMAGE_MODEL);
+  }
+
+  function setModelButtonState(modelGrid, gptButton, isGptActive) {
+    gptButton.className = isGptActive
+      ? "py-2.5 rounded-xl text-sm font-medium text-center transition-all bg-blue-500 text-white shadow-md"
+      : "py-2.5 rounded-xl text-sm font-medium text-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200";
+    if (!isGptActive) return;
+
     Array.from(modelGrid.querySelectorAll("button")).forEach(function (button) {
-      if (button === activeButton) return;
+      if (button === gptButton) return;
       button.className = "py-2.5 rounded-xl text-sm font-medium text-center transition-all bg-slate-100 text-slate-600 hover:bg-slate-200";
     });
   }

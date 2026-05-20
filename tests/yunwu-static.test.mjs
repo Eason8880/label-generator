@@ -32,6 +32,8 @@ test("yunwu adapter supports Gemini models and gpt-image-2-all Images edits", as
   assert.match(adapter, /0\.165/);
   assert.match(adapter, /0\.06 元\/次/);
   assert.match(adapter, /buildImagesEditsForm/);
+  assert.match(adapter, /syncModelButtonState/);
+  assert.match(adapter, /setModelButtonState/);
   assert.match(adapter, /PDF 转换后的页面图片/);
   assert.match(adapter, /image1 到 image/);
   assert.match(adapter, /response_format/);
