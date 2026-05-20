@@ -184,7 +184,7 @@
         imageFiles.length
       )
     );
-    upload.append("response_format", String(form.get("response_format") || "url"));
+    upload.append("response_format", "b64_json");
 
     imageFiles.forEach(function (file, index) {
       upload.append("image", file, file.name || "pdf_page_" + (index + 1) + ".png");
