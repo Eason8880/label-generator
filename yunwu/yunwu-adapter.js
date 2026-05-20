@@ -79,6 +79,11 @@
 
   async function sendToYunwu(form, init) {
     var rawModel = String(form.get("model") || DEFAULT_LEGACY_MODEL);
+    // 优先以 localStorage 中用户选定的模型为准（应对 React state 未同步的情况）
+    try {
+      var lsModel = localStorage.getItem(MODEL_KEY);
+      if (lsModel === GPT_IMAGE_MODEL) rawModel = GPT_IMAGE_MODEL;
+    } catch (e) {}
     if (rawModel === GPT_IMAGE_MODEL) {
       return sendToYunwuImagesEdits(form, init);
     }
@@ -169,8 +174,15 @@
       );
     }
 
-    var images = await waitForImagesReady(extractImages(payload));
-    return jsonResponse({ data: images.length ? images : [] }, response.status);
+    var extracted = extractImages(payload);
+    if (!extracted.length) {
+      return jsonResponse(
+        { error: { message: "Yunwu 未返回图片，请重试" } },
+        502
+      );
+    }
+    var images = await waitForImagesReady(extracted);
+    return jsonResponse({ data: images }, response.status);
   }
 
   function buildImagesEditsForm(form, imageFiles) {
@@ -455,7 +467,6 @@
           localStorage.setItem(MODEL_KEY, GPT_IMAGE_MODEL);
         } catch (error) {}
         setModelButtonState(modelGrid, button, true);
-        window.location.reload();
       });
       modelGrid.insertBefore(button, modelGrid.firstElementChild);
     } else if (button !== modelGrid.firstElementChild) {
