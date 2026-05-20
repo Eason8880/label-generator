@@ -169,7 +169,7 @@
       );
     }
 
-    var images = extractImages(payload);
+    var images = await waitForImagesReady(extractImages(payload));
     return jsonResponse({ data: images.length ? images : [] }, response.status);
   }
 
@@ -346,6 +346,60 @@
   function dataUrl(base64, mimeType) {
     if (/^data:/i.test(base64)) return base64;
     return "data:" + (mimeType || "image/png") + ";base64," + base64;
+  }
+
+  async function waitForImagesReady(images) {
+    var output = [];
+    for (var index = 0; index < images.length; index += 1) {
+      var item = images[index];
+      if (!item || !item.url || /^data:/i.test(item.url)) {
+        output.push(item);
+        continue;
+      }
+
+      var url = cacheBustUrl(item.url);
+      var readyUrl = await waitForImageReady(url);
+      output.push({ url: readyUrl || url });
+    }
+    return output;
+  }
+
+  function cacheBustUrl(url) {
+    if (!/^https?:\/\//i.test(url)) return url;
+    var joiner = url.indexOf("?") >= 0 ? "&" : "?";
+    return url + joiner + "_yunwu_t=" + Date.now();
+  }
+
+  function waitForImageReady(url) {
+    return new Promise(function (resolve) {
+      var attempts = 0;
+      function tryLoad() {
+        attempts += 1;
+        var image = new Image();
+        var settled = false;
+        var timer = setTimeout(function () {
+          finish(false);
+        }, 2500);
+
+        function finish(ok) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          if (ok) resolve(url);
+          else if (attempts < 4) setTimeout(tryLoad, 800);
+          else resolve("");
+        }
+
+        image.onload = function () {
+          finish(true);
+        };
+        image.onerror = function () {
+          finish(false);
+        };
+        image.src = url;
+      }
+      tryLoad();
+    });
   }
 
   function replaceText(root) {
