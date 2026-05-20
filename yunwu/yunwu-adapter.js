@@ -16,6 +16,48 @@
   };
   window.Worker.prototype = OriginalWorker.prototype;
 
+  // Patch PDF.js getDocument to inject cMapUrl and standardFontDataUrl.
+  // When the worker runs as a blob URL it has no meaningful base path, so
+  // PDF.js cannot resolve relative resource URLs — causing page.render() to
+  // hang indefinitely for PDFs that need CMap data (CJK fonts) or standard
+  // font metrics. We import the module early so the patch is in place before
+  // the React bundle's lazy yp() call ever calls getDocument().
+  (function () {
+    var PDF_JS_URL = new URL("./assets/pdf-oLLPIlWI.js", document.baseURI).href;
+    import(PDF_JS_URL)
+      .then(function (m) {
+        var pdfjs = (m && m.p && (m.p.default || m.p)) || (m && m.default) || m;
+        if (!pdfjs || typeof pdfjs.getDocument !== "function") return;
+
+        var version = pdfjs.version || "3.11.174";
+        var base = "https://cdn.jsdelivr.net/npm/pdfjs-dist@" + version + "/";
+        var _orig = pdfjs.getDocument;
+
+        pdfjs.getDocument = function patchedGetDocument(src) {
+          if (
+            src &&
+            typeof src === "object" &&
+            !(src instanceof ArrayBuffer) &&
+            !ArrayBuffer.isView(src)
+          ) {
+            var extra = {};
+            if (!src.cMapUrl) {
+              extra.cMapUrl = base + "cmaps/";
+              extra.cMapPacked = true;
+            }
+            if (!src.standardFontDataUrl) {
+              extra.standardFontDataUrl = base + "standard_fonts/";
+            }
+            if (Object.keys(extra).length) {
+              src = Object.assign({}, src, extra);
+            }
+          }
+          return _orig.call(this, src);
+        };
+      })
+      .catch(function () {});
+  })();
+
   var LEGACY_ENDPOINT = "https://api.bltcy.ai/v1/images/edits";
   var YUNWU_MODEL_ENDPOINT = "/yunwu-api/v1beta/models/";
   var YUNWU_IMAGES_EDITS_ENDPOINT = "/yunwu-api/v1/images/edits";
