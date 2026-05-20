@@ -19,6 +19,7 @@
   var GPT_IMAGE_MODEL = "gpt-image-2-all";
   var DEFAULT_LEGACY_MODEL = GPT_IMAGE_MODEL;
   var MODEL_KEY = "pdf2img_model";
+  var MODEL_DEFAULT_MIGRATION_KEY = "pdf2img_model_default_v2";
   var MODEL_MAP = {
     "gemini-3.1-flash-image-preview-2k": "gemini-3.1-flash-image-preview",
     "nano-banana-2-2k": "gemini-3-pro-image-preview",
@@ -54,10 +55,16 @@
 
   try {
     var storedModel = localStorage.getItem(MODEL_KEY);
+    var migratedDefault = localStorage.getItem(MODEL_DEFAULT_MIGRATION_KEY);
     if (!storedModel) {
       localStorage.setItem(MODEL_KEY, DEFAULT_LEGACY_MODEL);
+      localStorage.setItem(MODEL_DEFAULT_MIGRATION_KEY, "1");
+    } else if (!migratedDefault && storedModel !== GPT_IMAGE_MODEL) {
+      localStorage.setItem(MODEL_KEY, DEFAULT_LEGACY_MODEL);
+      localStorage.setItem(MODEL_DEFAULT_MIGRATION_KEY, "1");
     } else if (!MODEL_MAP[storedModel]) {
       localStorage.setItem(MODEL_KEY, DEFAULT_LEGACY_MODEL);
+      localStorage.setItem(MODEL_DEFAULT_MIGRATION_KEY, "1");
     }
   } catch (error) {}
 
@@ -396,7 +403,9 @@
         setModelButtonState(modelGrid, button, true);
         window.location.reload();
       });
-      modelGrid.appendChild(button);
+      modelGrid.insertBefore(button, modelGrid.firstElementChild);
+    } else if (button !== modelGrid.firstElementChild) {
+      modelGrid.insertBefore(button, modelGrid.firstElementChild);
     }
 
     syncModelButtonState(modelGrid, button);

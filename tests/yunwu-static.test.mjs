@@ -29,6 +29,8 @@ test("yunwu adapter supports Gemini models and gpt-image-2-all Images edits", as
   assert.match(adapter, /gemini-3-pro-image-preview/);
   assert.match(adapter, /gpt-image-2-all/);
   assert.match(adapter, /DEFAULT_LEGACY_MODEL = GPT_IMAGE_MODEL/);
+  assert.match(adapter, /MODEL_DEFAULT_MIGRATION_KEY/);
+  assert.match(adapter, /insertBefore\(button, modelGrid\.firstElementChild\)/);
   assert.match(adapter, /Nano Banana 2/);
   assert.match(adapter, /Nano Banana Pro/);
   assert.match(adapter, /GPT Image 2/);
