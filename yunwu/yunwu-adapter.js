@@ -79,12 +79,15 @@
 
   async function sendToYunwu(form, init) {
     var rawModel = String(form.get("model") || DEFAULT_LEGACY_MODEL);
-    // 优先以 localStorage 中用户选定的模型为准（应对 React state 未同步的情况）
-    // 所有模型（包括 GPT Image 2）均走 generateContent 统一路径
+    // GPT Image 2 由适配器自定义按钮管理，React state 不会同步该模型；
+    // 以 localStorage 为准：仅当用户明确选了 GPT Image 2 时才走 images/edits 分支
     try {
       var lsModel = localStorage.getItem(MODEL_KEY);
-      if (lsModel && MODEL_MAP[lsModel]) rawModel = lsModel;
+      if (lsModel === GPT_IMAGE_MODEL) rawModel = GPT_IMAGE_MODEL;
     } catch (e) {}
+    if (rawModel === GPT_IMAGE_MODEL) {
+      return sendToYunwuImagesEdits(form, init);
+    }
 
     var model = MODEL_MAP[rawModel] || "gemini-3.1-flash-image-preview";
     var apiKey = readBearerToken(init.headers);
