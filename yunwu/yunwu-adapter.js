@@ -2,8 +2,11 @@
   "use strict";
 
   // Redirect CDN-hosted PDF.js worker to local copy so it works same-origin
+  // Use document.baseURI (respects <base href>) instead of a relative path —
+  // new Worker() resolves relative URLs against window.location.href, which has
+  // no trailing slash at /yunwu, causing ./assets/… to land at the wrong path.
   var PDF_WORKER_CDN_RE = /cdnjs\.cloudflare\.com.*pdf\.worker/i;
-  var PDF_WORKER_LOCAL = "./assets/pdf.worker.min.js";
+  var PDF_WORKER_LOCAL = new URL("./assets/pdf.worker.min.js", document.baseURI).href;
   var OriginalWorker = window.Worker;
   window.Worker = function PatchedWorker(url, options) {
     if (typeof url === "string" && PDF_WORKER_CDN_RE.test(url)) {
