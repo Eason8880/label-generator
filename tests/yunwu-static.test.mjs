@@ -28,9 +28,15 @@ test("yunwu adapter supports Gemini models and gpt-image-2-all Images edits", as
   assert.match(adapter, /gemini-3\.1-flash-image-preview/);
   assert.match(adapter, /gemini-3-pro-image-preview/);
   assert.match(adapter, /gpt-image-2-all/);
+  assert.match(adapter, /DEFAULT_LEGACY_MODEL = GPT_IMAGE_MODEL/);
+  assert.match(adapter, /Nano Banana 2/);
+  assert.match(adapter, /Nano Banana Pro/);
+  assert.match(adapter, /GPT Image 2/);
   assert.match(adapter, /0\.083/);
   assert.match(adapter, /0\.165/);
-  assert.match(adapter, /0\.06 元\/次/);
+  assert.match(adapter, /0\.060 元\/次/);
+  assert.match(adapter, /0\.083 元\/次 · 默认/);
+  assert.match(adapter, /gridTemplateColumns = "repeat\(3, minmax\(0, 1fr\)\)"/);
   assert.match(adapter, /buildImagesEditsForm/);
   assert.match(adapter, /syncModelButtonState/);
   assert.match(adapter, /setModelButtonState/);

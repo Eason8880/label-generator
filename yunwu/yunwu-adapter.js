@@ -16,8 +16,8 @@
   var LEGACY_ENDPOINT = "https://api.bltcy.ai/v1/images/edits";
   var YUNWU_MODEL_ENDPOINT = "/yunwu-api/v1beta/models/";
   var YUNWU_IMAGES_EDITS_ENDPOINT = "/yunwu-api/v1/images/edits";
-  var DEFAULT_LEGACY_MODEL = "gemini-3.1-flash-image-preview-2k";
   var GPT_IMAGE_MODEL = "gpt-image-2-all";
+  var DEFAULT_LEGACY_MODEL = GPT_IMAGE_MODEL;
   var MODEL_KEY = "pdf2img_model";
   var MODEL_MAP = {
     "gemini-3.1-flash-image-preview-2k": "gemini-3.1-flash-image-preview",
@@ -27,10 +27,15 @@
     "gpt-image-2-all": "gpt-image-2-all"
   };
   var MODEL_TEXT = {
-    "gemini-3.1-flash-image-preview-2k": "gemini-3.1-flash-image-preview",
-    "nano-banana-2-2k": "gemini-3-pro-image-preview",
+    "gemini-3.1-flash": "Nano Banana 2",
+    "gemini-3.1-flash-image-preview-2k": "Nano Banana 2",
+    "gemini-3.1-flash-image-preview": "Nano Banana 2",
+    "nano-banana-2-2k": "Nano Banana Pro",
+    "gemini-3-pro-image-preview": "Nano Banana Pro",
+    "gpt-image-2-all": "GPT Image 2",
     "0.1元/次": "0.083 元/次",
     "0.2元/次": "0.165 元/次",
+    "0.083 元/次 · 默认": "0.083 元/次",
     "Key 仅保存在浏览器本地，不会上传至任何服务器": "Key 存在本浏览器；生成时会转发给 Yunwu API，本站不保存",
     "API Key 仅保存在浏览器本地": "API Key 存在本浏览器，生成时转发给 Yunwu API"
   };
@@ -49,7 +54,9 @@
 
   try {
     var storedModel = localStorage.getItem(MODEL_KEY);
-    if (storedModel && !MODEL_MAP[storedModel]) {
+    if (!storedModel) {
+      localStorage.setItem(MODEL_KEY, DEFAULT_LEGACY_MODEL);
+    } else if (!MODEL_MAP[storedModel]) {
       localStorage.setItem(MODEL_KEY, DEFAULT_LEGACY_MODEL);
     }
   } catch (error) {}
@@ -374,13 +381,14 @@
     });
     var modelGrid = modelHeading && modelHeading.parentElement && modelHeading.parentElement.querySelector(".grid");
     if (!modelGrid) return;
+    modelGrid.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
 
     var button = modelGrid.querySelector('[data-yunwu-model="' + GPT_IMAGE_MODEL + '"]');
     if (!button) {
       button = document.createElement("button");
       button.type = "button";
       button.dataset.yunwuModel = GPT_IMAGE_MODEL;
-      button.innerHTML = 'gpt-image-2-all<br><span class="text-xs opacity-75">0.06 元/次</span>';
+      button.innerHTML = 'GPT Image 2<br><span class="text-xs opacity-75">0.060 元/次</span>';
       button.addEventListener("click", function () {
         try {
           localStorage.setItem(MODEL_KEY, GPT_IMAGE_MODEL);
